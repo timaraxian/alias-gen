@@ -26,6 +26,7 @@ type DBAL struct {
 
 var MigrationFiles = []string{
 	migrations.CreateWordsTable,
+	migrations.CreatePatternsTable,
 }
 
 func Bootstrap(config Config) (db *DBAL, err error) {
