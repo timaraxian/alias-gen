@@ -2,6 +2,7 @@ package database
 
 import (
 	"database/sql"
+	"fmt"
 	"time"
 
 	"github.com/timaraxian/hotel-gen/pkg/errors"
@@ -191,4 +192,138 @@ func (dbal DBAL) WordSetUnArchive(wordID string) (err error) {
 	}
 
 	return nil
+}
+
+type WordListArgs struct {
+	Limit            *int
+	Offset           *int
+	OrderByWord      *bool
+	DescWord         *bool
+	OrderByLanguage  *bool
+	DescLanguage     *bool
+	OrderByPart      *bool
+	DescPart         *bool
+	OrderByUpdatedAt *bool
+	DescUpdatedAt    *bool
+	OrderByCreatedAt *bool
+	DescCreatedAt    *bool
+	ShowArchived     *bool
+}
+
+func (dbal DBAL) WordList(listArgs WordListArgs) (words []Word, err error) {
+	// ------ build statement
+	stmt := `SELECT 
+		word_id,
+		word,
+		language,
+		part,
+		created_at,
+		updated_at,
+		archived_at FROM words %s %s %s %s;`
+
+	// %s(1) show archived or not
+	showArchived := ""
+	if listArgs.ShowArchived != nil && !*listArgs.ShowArchived {
+		showArchived = "WHERE archived_at IS NULL"
+	}
+
+	// %s(2) orderbys
+	orderBy := "ORDER BY "
+	if listArgs.OrderByWord != nil && *listArgs.OrderByWord {
+		orderBy += "word"
+
+		if listArgs.DescWord != nil && *listArgs.DescWord {
+			orderBy += " desc, "
+		} else {
+			orderBy += ", "
+		}
+	}
+	if listArgs.OrderByLanguage != nil && *listArgs.OrderByLanguage {
+		orderBy += "language"
+
+		if listArgs.DescLanguage != nil && *listArgs.DescLanguage {
+			orderBy += " desc, "
+		} else {
+			orderBy += ", "
+		}
+	}
+	if listArgs.OrderByPart != nil && *listArgs.OrderByPart {
+		orderBy += "part"
+
+		if listArgs.DescPart != nil && *listArgs.DescPart {
+			orderBy += " desc, "
+		} else {
+			orderBy += ", "
+		}
+	}
+	if listArgs.OrderByUpdatedAt != nil && *listArgs.OrderByUpdatedAt {
+		orderBy += "updated_at"
+
+		if listArgs.DescUpdatedAt != nil && *listArgs.DescUpdatedAt {
+			orderBy += " desc, "
+		} else {
+			orderBy += ", "
+		}
+	}
+	if listArgs.OrderByCreatedAt != nil && *listArgs.OrderByCreatedAt {
+		orderBy += "created_at"
+
+		if listArgs.DescCreatedAt != nil && *listArgs.DescCreatedAt {
+			orderBy += " desc, "
+		} else {
+			orderBy += ", "
+		}
+	}
+	if orderBy == "ORDER BY " {
+		orderBy = ""
+	} else {
+		orderBy = orderBy[:len(orderBy)-2]
+	}
+
+	// %s(3) limit
+	limit := ""
+	if listArgs.Limit != nil && *listArgs.Limit > 0 {
+		limit = fmt.Sprintf("LIMIT %d", *listArgs.Limit)
+	} else {
+		limit = "LIMIT 50"
+	}
+
+	// %s(4) offset
+	offset := ""
+	if listArgs.Offset != nil && *listArgs.Offset > 0 {
+		offset = fmt.Sprintf("OFFSET %d", *listArgs.Offset)
+	}
+
+	stmt = fmt.Sprintf(stmt, showArchived, orderBy, limit, offset)
+
+	// ------- statement built
+
+	rows, err := dbal.Query(stmt)
+	if err != nil {
+		return words, errors.UnexpectedError(err, "Failed listing words")
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		word := Word{}
+		if err := rows.Scan(
+			&word.WordID,
+			&word.Word,
+			&word.Language,
+			&word.Part,
+			&word.CreatedAt,
+			&word.UpdatedAt,
+			&word.ArchivedAt,
+		); err != nil {
+			return words, errors.UnexpectedError(err, "Failed scanning words")
+		}
+
+		words = append(words, word)
+	}
+
+	if err := rows.Err(); err != nil {
+		return words, errors.UnexpectedError(err, "Failed iterating word rows")
+	}
+
+	return words, err
 }

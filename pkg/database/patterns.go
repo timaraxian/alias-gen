@@ -2,6 +2,7 @@ package database
 
 import (
 	"database/sql"
+	"fmt"
 	"time"
 
 	"github.com/timaraxian/hotel-gen/pkg/errors"
@@ -164,4 +165,125 @@ func (dbal DBAL) PatternSetUnArchive(patternID string) (err error) {
 	}
 
 	return nil
+}
+
+type PatternListArgs struct {
+	Limit            *int
+	Offset           *int
+	OrderByPattern   *bool
+	DescPattern      *bool
+	OrderByLanguage  *bool
+	DescLanguage     *bool
+	OrderByUpdatedAt *bool
+	DescUpdatedAt    *bool
+	OrderByCreatedAt *bool
+	DescCreatedAt    *bool
+	ShowArchived     *bool
+}
+
+func (dbal DBAL) PatternList(listArgs PatternListArgs) (patterns []Pattern, err error) {
+	// ------ build statement
+	stmt := `SELECT 
+		pattern_id,
+		pattern,
+		language,
+		created_at,
+		updated_at,
+		archived_at FROM patterns %s %s %s %s;`
+
+	// %s(1) show archived or not
+	showArchived := ""
+	if listArgs.ShowArchived != nil && !*listArgs.ShowArchived {
+		showArchived = "WHERE archived_at IS NULL"
+	}
+
+	// %s(2) orderbys
+	orderBy := "ORDER BY "
+	if listArgs.OrderByPattern != nil && *listArgs.OrderByPattern {
+		orderBy += "pattern"
+
+		if listArgs.DescPattern != nil && *listArgs.DescPattern {
+			orderBy += " desc, "
+		} else {
+			orderBy += ", "
+		}
+	}
+	if listArgs.OrderByLanguage != nil && *listArgs.OrderByLanguage {
+		orderBy += "language"
+
+		if listArgs.DescLanguage != nil && *listArgs.DescLanguage {
+			orderBy += " desc, "
+		} else {
+			orderBy += ", "
+		}
+	}
+	if listArgs.OrderByUpdatedAt != nil && *listArgs.OrderByUpdatedAt {
+		orderBy += "updated_at"
+
+		if listArgs.DescUpdatedAt != nil && *listArgs.DescUpdatedAt {
+			orderBy += " desc, "
+		} else {
+			orderBy += ", "
+		}
+	}
+	if listArgs.OrderByCreatedAt != nil && *listArgs.OrderByCreatedAt {
+		orderBy += "created_at"
+
+		if listArgs.DescCreatedAt != nil && *listArgs.DescCreatedAt {
+			orderBy += " desc, "
+		} else {
+			orderBy += ", "
+		}
+	}
+	if orderBy == "ORDER BY " {
+		orderBy = ""
+	} else {
+		orderBy = orderBy[:len(orderBy)-2]
+	}
+
+	// %s(3) limit
+	limit := ""
+	if listArgs.Limit != nil && *listArgs.Limit > 0 {
+		limit = fmt.Sprintf("LIMIT %d", *listArgs.Limit)
+	} else {
+		limit = "LIMIT 50"
+	}
+
+	// %s(4) offset
+	offset := ""
+	if listArgs.Offset != nil && *listArgs.Offset > 0 {
+		offset = fmt.Sprintf("OFFSET %d", *listArgs.Offset)
+	}
+
+	stmt = fmt.Sprintf(stmt, showArchived, orderBy, limit, offset)
+
+	// ------- statement built
+
+	rows, err := dbal.Query(stmt)
+	if err != nil {
+		return patterns, errors.UnexpectedError(err, "Failed listing patterns")
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		pattern := Pattern{}
+		if err := rows.Scan(
+			&pattern.PatternID,
+			&pattern.Pattern,
+			&pattern.Language,
+			&pattern.CreatedAt,
+			&pattern.UpdatedAt,
+			&pattern.ArchivedAt,
+		); err != nil {
+			return patterns, errors.UnexpectedError(err, "Failed scanning patterns")
+		}
+
+		patterns = append(patterns, pattern)
+	}
+
+	if err := rows.Err(); err != nil {
+		return patterns, errors.UnexpectedError(err, "Failed iterating pattern rows")
+	}
+
+	return patterns, err
 }
