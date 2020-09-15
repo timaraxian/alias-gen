@@ -53,7 +53,7 @@ func (dbal *DBAL) WordCreate(word_in, language, part string) (word Word, err err
 		return word, nil
 	}
 
-	if dbIsDuplicateErr(err, "words_word_language_part") {
+	if dbIsDuplicateErr(err, "words_language_part_word") {
 		return word, errors.WordDuplicate
 	}
 
@@ -105,7 +105,7 @@ func (dbal DBAL) WordSetWord(wordID, word string) (err error) {
 	stmt := `UPDATE words SET word=$1, updated_at=$2 WHERE word_id=$3 AND archived_at IS NULL;`
 
 	_, n, err := dbal.ExecOne(stmt, word, time.Now(), wordID)
-	if dbIsDuplicateErr(err, "words_word_language_part") {
+	if dbIsDuplicateErr(err, "words_language_part_word") {
 		return errors.WordDuplicate
 	}
 	if err != nil {
@@ -126,7 +126,7 @@ func (dbal DBAL) WordSetLanguage(wordID, language string) (err error) {
 	stmt := `UPDATE words SET language=$1, updated_at=$2 WHERE word_id=$3 AND archived_at IS NULL;`
 
 	_, n, err := dbal.ExecOne(stmt, language, time.Now(), wordID)
-	if dbIsDuplicateErr(err, "words_word_language_part") {
+	if dbIsDuplicateErr(err, "words_language_part_word") {
 		return errors.WordDuplicate
 	}
 	if err != nil {
@@ -147,7 +147,7 @@ func (dbal DBAL) WordSetPart(wordID, part string) (err error) {
 	stmt := `UPDATE words SET part=$1, updated_at=$2 WHERE word_id=$3 AND archived_at IS NULL;`
 
 	_, n, err := dbal.ExecOne(stmt, part, time.Now(), wordID)
-	if dbIsDuplicateErr(err, "words_word_language_part") {
+	if dbIsDuplicateErr(err, "words_language_part_word") {
 		return errors.WordDuplicate
 	}
 	if err != nil {

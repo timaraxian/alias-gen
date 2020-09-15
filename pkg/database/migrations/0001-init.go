@@ -11,6 +11,6 @@ created_at  TIMESTAMPTZ NOT NULL,
 updated_at  TIMESTAMPTZ NOT NULL,
 archived_at TIMESTAMPTZ,
 
-CONSTRAINT words_word_language_part UNIQUE (word, language, part)
+CONSTRAINT words_language_part_word UNIQUE (language, part, word)
 );
 `
