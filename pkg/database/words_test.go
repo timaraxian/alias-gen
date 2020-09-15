@@ -340,3 +340,54 @@ func TestDBAL_WordSetUnarchive(t *testing.T) {
 		t.Fatal(word_out)
 	}
 }
+
+// -----------------------------------------------------------------------------
+// DBAL.WordList
+// -----------------------------------------------------------------------------
+func TestDBAL_WordList(t *testing.T) {
+	t.Parallel()
+	dbal, close := NewTestDBAL()
+	defer close()
+
+	w1, err := dbal.WordCreate("Grand", "en", "adjective")
+	if err != nil {
+		t.Fatal(err)
+	}
+	w2, err := dbal.WordCreate("Hotel", "en", "noun")
+	if err != nil {
+		t.Fatal(err)
+	}
+	w3, err := dbal.WordCreate("The", "en", "article")
+	if err != nil {
+		t.Fatal(err)
+	}
+	w4, err := dbal.WordCreate("Budapest", "en", "place")
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	limit := 10
+	trueVar := true
+	listargs := WordListArgs{
+		Limit:       &limit,
+		OrderByWord: &trueVar,
+	}
+
+	results, err := dbal.WordList(listargs)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if results[0].WordID != w4.WordID {
+		t.Fatal(results[0])
+	}
+	if results[1].WordID != w1.WordID {
+		t.Fatal(results[1])
+	}
+	if results[2].WordID != w2.WordID {
+		t.Fatal(results[2])
+	}
+	if results[3].WordID != w3.WordID {
+		t.Fatal(results[3])
+	}
+}

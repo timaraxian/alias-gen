@@ -264,3 +264,55 @@ func TestDBAL_PatternSetUnarchive(t *testing.T) {
 		t.Fatal(pattern_out)
 	}
 }
+
+// -----------------------------------------------------------------------------
+// DBAL.PatternList
+// -----------------------------------------------------------------------------
+func TestDBAL_PatternList(t *testing.T) {
+	t.Parallel()
+	dbal, close := NewTestDBAL()
+	defer close()
+
+	p1, err := dbal.PatternCreate("article,adjective,place,noun", "en")
+	if err != nil {
+		t.Fatal(err)
+	}
+	p2, err := dbal.PatternCreate("adjective,noun", "en")
+	if err != nil {
+		t.Fatal(err)
+	}
+	p3, err := dbal.PatternCreate("place,article,noun", "en")
+	if err != nil {
+		t.Fatal(err)
+	}
+	p4, err := dbal.PatternCreate("adjective,noun", "fr")
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	limit := 10
+	trueVar := true
+	listargs := PatternListArgs{
+		Limit:           &limit,
+		OrderByPattern:  &trueVar,
+		OrderByLanguage: &trueVar,
+	}
+
+	results, err := dbal.PatternList(listargs)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if results[0].PatternID != p2.PatternID {
+		t.Fatal(results[0])
+	}
+	if results[1].PatternID != p4.PatternID {
+		t.Fatal(results[1])
+	}
+	if results[2].PatternID != p1.PatternID {
+		t.Fatal(results[2])
+	}
+	if results[3].PatternID != p3.PatternID {
+		t.Fatal(results[3])
+	}
+}
