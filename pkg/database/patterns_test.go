@@ -316,3 +316,60 @@ func TestDBAL_PatternList(t *testing.T) {
 		t.Fatal(results[3])
 	}
 }
+
+// -----------------------------------------------------------------------------
+// DBAL.PatternRandom
+// -----------------------------------------------------------------------------
+func TestDBAL_PatternRandom(t *testing.T) {
+	t.Parallel()
+	dbal, close := NewTestDBAL()
+	defer close()
+
+	p1, err := dbal.PatternCreate("adjective,noun", "en")
+	if err != nil {
+		t.Fatal(err)
+	}
+	p2, err := dbal.PatternCreate("adjective,place,noun", "en")
+	if err != nil {
+		t.Fatal(err)
+	}
+	p3, err := dbal.PatternCreate("adjective,noun", "fr")
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	outIDs := map[string]int{}
+	for i := 0; i < 100; i++ {
+		p_out, err := dbal.PatternRandom("en")
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		if p_out.PatternID == p3.PatternID {
+			t.Fatal(p_out)
+		}
+		if _, ok := outIDs[p_out.PatternID]; !ok {
+			outIDs[p_out.PatternID] = 0
+		}
+		outIDs[p_out.PatternID] += 1
+	}
+
+	if _, ok := outIDs[p1.PatternID]; !ok {
+		t.Fatal(p1)
+	}
+	if _, ok := outIDs[p2.PatternID]; !ok {
+		t.Fatal(p2)
+	}
+}
+
+func TestDBAL_PatternRandom_PatternNotFound(t *testing.T) {
+	t.Parallel()
+	dbal, close := NewTestDBAL()
+	defer close()
+
+	_, err := dbal.PatternRandom("en")
+	if err != errors.PatternNotFound {
+		t.Fatal(err)
+	}
+
+}

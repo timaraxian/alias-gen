@@ -391,3 +391,60 @@ func TestDBAL_WordList(t *testing.T) {
 		t.Fatal(results[3])
 	}
 }
+
+// -----------------------------------------------------------------------------
+// DBAL.WordRandom
+// -----------------------------------------------------------------------------
+func TestDBAL_WordRandom(t *testing.T) {
+	t.Parallel()
+	dbal, close := NewTestDBAL()
+	defer close()
+
+	w1, err := dbal.WordCreate("Grand", "en", "adjective")
+	if err != nil {
+		t.Fatal(err)
+	}
+	w2, err := dbal.WordCreate("Pink", "en", "adjective")
+	if err != nil {
+		t.Fatal(err)
+	}
+	w3, err := dbal.WordCreate("Budapest", "en", "place")
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	outIDs := map[string]int{}
+	for i := 0; i < 100; i++ {
+		w_out, err := dbal.WordRandom("en", "adjective")
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		if w_out.WordID == w3.WordID {
+			t.Fatal(w_out)
+		}
+		if _, ok := outIDs[w_out.WordID]; !ok {
+			outIDs[w_out.WordID] = 0
+		}
+		outIDs[w_out.WordID] += 1
+	}
+
+	if _, ok := outIDs[w1.WordID]; !ok {
+		t.Fatal(w1)
+	}
+	if _, ok := outIDs[w2.WordID]; !ok {
+		t.Fatal(w2)
+	}
+}
+
+func TestDBAL_WordRandom_WordNotFound(t *testing.T) {
+	t.Parallel()
+	dbal, close := NewTestDBAL()
+	defer close()
+
+	_, err := dbal.WordRandom("en", "adjective")
+	if err != errors.WordNotFound {
+		t.Fatal(err)
+	}
+
+}
