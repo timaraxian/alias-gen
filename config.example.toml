@@ -2,7 +2,7 @@ ListenAddr = ":1994"
 
 [DB]
 DBHost     = "localhost"
-DBName     = "hotel-gen"
+DBName     = "hotel_gen"
 DBUser     = "timmy"
 DBPassword = "123"
 DBPort     = "5432"

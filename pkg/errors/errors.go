@@ -8,15 +8,17 @@ import (
 var (
 	Unexpected = NewErr("Unexpected")
 
+	HttpBadRequestArgs = NewErr("HttpBadRequestArgs")
+	HttpBadMethod      = NewErr("HttpBadMethod")
+	HttpBadContentType = NewErr("HttpBadContentType")
+
 	WordDuplicate = NewErr("DuplicateWord")
 	WordNotFound  = NewErr("WordNotFound")
 
 	PatternDuplicate = NewErr("DuplicatePattern")
 	PatternNotFound  = NewErr("PatternNotFound")
 
-	InvalidUUID         = NewErr("InvalidUUID")
-	InvalidSessionToken = NewErr("InvalidSessionToken")
-	InvalidSlug         = NewErr("InvalidSlug")
+	InvalidUUID = NewErr("InvalidUUID")
 )
 
 // -----------------------------------------------------------------------------
