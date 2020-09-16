@@ -327,3 +327,36 @@ func (dbal DBAL) WordList(listArgs WordListArgs) (words []Word, err error) {
 
 	return words, err
 }
+
+func (dbal DBAL) WordRandom(language, part string) (word Word, err error) {
+	// todo: validate language, part
+
+	stmt := `SELECT
+                word_id,
+                word,
+                language,
+                part,
+                created_at,
+                updated_at,
+                archived_at FROM words WHERE language=$1 AND part=$2 ORDER BY RANDOM() LIMIT 1;`
+
+	err = dbal.QueryRow(stmt, language, part).Scan(
+		&word.WordID,
+		&word.Word,
+		&word.Language,
+		&word.Part,
+		&word.CreatedAt,
+		&word.UpdatedAt,
+		&word.ArchivedAt,
+	)
+
+	if err == nil {
+		return word, nil
+	}
+
+	if err == sql.ErrNoRows {
+		return word, errors.WordNotFound
+	}
+
+	return word, errors.UnexpectedError(err, "Failed getting word")
+}

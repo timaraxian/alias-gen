@@ -287,3 +287,34 @@ func (dbal DBAL) PatternList(listArgs PatternListArgs) (patterns []Pattern, err 
 
 	return patterns, err
 }
+
+func (dbal DBAL) PatternRandom(language string) (pattern Pattern, err error) {
+	// todo: validate language
+
+	stmt := `SELECT
+                pattern_id,
+                pattern,
+                language,
+                created_at,
+                updated_at,
+                archived_at FROM patterns WHERE language=$1 ORDER BY RANDOM() LIMIT 1;`
+
+	err = dbal.QueryRow(stmt, language).Scan(
+		&pattern.PatternID,
+		&pattern.Pattern,
+		&pattern.Language,
+		&pattern.CreatedAt,
+		&pattern.UpdatedAt,
+		&pattern.ArchivedAt,
+	)
+
+	if err == nil {
+		return pattern, nil
+	}
+
+	if err == sql.ErrNoRows {
+		return pattern, errors.PatternNotFound
+	}
+
+	return pattern, errors.UnexpectedError(err, "Failed getting pattern")
+}
