@@ -6,7 +6,7 @@ import (
 	"net/http"
 	"net/url"
 
-	"github.com/timaraxian/hotel-gen/pkg/errors"
+	"github.com/timaraxian/alias-gen/pkg/errors"
 )
 
 type middleware func(next http.Handler) http.Handler

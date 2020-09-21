@@ -8,7 +8,7 @@ import (
 	"github.com/lib/pq"
 	_ "github.com/lib/pq"
 	"github.com/pkg/errors"
-	"github.com/timaraxian/hotel-gen/pkg/database/migrations"
+	"github.com/timaraxian/alias-gen/pkg/database/migrations"
 )
 
 type Config struct {

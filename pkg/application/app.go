@@ -7,8 +7,8 @@ import (
 	"net/http"
 	"runtime/debug"
 
-	"github.com/timaraxian/hotel-gen/pkg/database"
-	"github.com/timaraxian/hotel-gen/pkg/errors"
+	"github.com/timaraxian/alias-gen/pkg/database"
+	"github.com/timaraxian/alias-gen/pkg/errors"
 )
 
 type App struct {

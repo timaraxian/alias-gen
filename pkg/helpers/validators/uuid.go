@@ -3,7 +3,7 @@ package validators
 import (
 	"regexp"
 
-	"github.com/timaraxian/hotel-gen/pkg/errors"
+	"github.com/timaraxian/alias-gen/pkg/errors"
 )
 
 var uuidPattern = regexp.MustCompile(

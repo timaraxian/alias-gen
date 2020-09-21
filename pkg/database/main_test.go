@@ -6,7 +6,7 @@ import (
 	"testing"
 
 	"github.com/BurntSushi/toml"
-	"github.com/timaraxian/hotel-gen/pkg/helpers/testdb"
+	"github.com/timaraxian/alias-gen/pkg/helpers/testdb"
 )
 
 var tdb *testdb.Manager

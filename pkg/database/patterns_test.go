@@ -4,9 +4,9 @@ import (
 	"testing"
 	"time"
 
-	"github.com/timaraxian/hotel-gen/pkg/errors"
-	"github.com/timaraxian/hotel-gen/pkg/helpers/crypto"
-	"github.com/timaraxian/hotel-gen/pkg/helpers/validators"
+	"github.com/timaraxian/alias-gen/pkg/errors"
+	"github.com/timaraxian/alias-gen/pkg/helpers/crypto"
+	"github.com/timaraxian/alias-gen/pkg/helpers/validators"
 )
 
 // -----------------------------------------------------------------------------

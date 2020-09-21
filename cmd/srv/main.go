@@ -9,8 +9,8 @@ import (
 	"time"
 
 	"github.com/BurntSushi/toml"
-	"github.com/timaraxian/hotel-gen/pkg/application"
-	"github.com/timaraxian/hotel-gen/pkg/helpers/alerts"
+	"github.com/timaraxian/alias-gen/pkg/application"
+	"github.com/timaraxian/alias-gen/pkg/helpers/alerts"
 )
 
 func main() {

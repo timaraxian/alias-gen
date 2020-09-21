@@ -3,7 +3,7 @@ package application
 import (
 	"database/sql"
 
-	"github.com/timaraxian/hotel-gen/pkg/database"
+	"github.com/timaraxian/alias-gen/pkg/database"
 )
 
 // -----------------------------------------------------------------------------
