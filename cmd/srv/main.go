@@ -15,7 +15,7 @@ import (
 
 func main() {
 	config := application.Config{}
-	if _, err := toml.DecodeFile(os.Getenv("HOTELGEN_CONFIG"), &config); err != nil {
+	if _, err := toml.DecodeFile(os.Getenv("ALIASGEN_CONFIG"), &config); err != nil {
 		log.Printf("Failed to open config file: %s\n", err)
 		os.Exit(1)
 	}
