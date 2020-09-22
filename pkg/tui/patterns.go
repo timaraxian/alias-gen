@@ -24,7 +24,7 @@ func (app *App) ShowNewPattern() (form *tview.Form) {
 			app.Ui.Stop()
 		}).
 		AddButton("Cancel", func() {
-			app.NextState = "list"
+			app.NextState = "menu"
 			app.Ui.Stop()
 		})
 
@@ -48,7 +48,7 @@ func (app *App) processPatternLanguage(text string) {
 	app.Pattern.SetLanguage = strings.TrimSpace(text)
 }
 
-func (app *App) SubmitNewPattern(form *tview.Form) (err error) {
+func (app *App) SubmitNewPattern() (err error) {
 	if app.NextState != "submitPattern" {
 		panic("Invalid State")
 	}
@@ -158,7 +158,10 @@ func (app *App) ViewPattern() (list *tview.List) {
 	UpdatedAt := pattern.UpdatedAt.Format("2006-01-02 15:04:05")
 	ArchivedAt := ""
 	if pattern.ArchivedAt != nil {
+		app.Pattern.Archive = true
 		ArchivedAt = pattern.ArchivedAt.Format("2006-01-02 15:04:05")
+	} else {
+		app.Pattern.Archive = false
 	}
 
 	list = tview.NewList().
@@ -222,7 +225,7 @@ func (app *App) ShowEditPatternPattern() (form *tview.Form) {
 	return form
 }
 
-func (app *App) SubmitPatternPattern(form *tview.Form) (err error) {
+func (app *App) SubmitPatternPattern() (err error) {
 	if app.NextState != "submitPatternPattern" {
 		panic("Invalid State")
 	}
@@ -258,13 +261,59 @@ func (app *App) ShowEditPatternLanguage() (form *tview.Form) {
 	return form
 }
 
-func (app *App) SubmitPatternLanguage(form *tview.Form) (err error) {
+func (app *App) SubmitPatternLanguage() (err error) {
 	if app.NextState != "submitPatternLanguage" {
 		panic("Invalid State")
 	}
 
 	err = app.DBAL.PatternSetLanguage(app.Pattern.GetPatternID, app.Pattern.SetLanguage)
 	app.PrevState = "submitPatternLanguage"
+	app.NextState = "viewPattern"
+	app.Update = true
+	return err
+}
+
+func (app *App) ShowEditPatternArchive() (form *tview.Form) {
+	if app.NextState != "editPatternArchive" {
+		panic("Invalid State")
+	}
+
+	form = tview.NewForm().
+		AddCheckbox("archived", app.Pattern.Archive, func(checked bool) {
+			app.processPatternArchived(checked)
+		}).
+		AddButton("Edit Archive", func() {
+			app.NextState = "submitPatternArchive"
+			app.Ui.Stop()
+		}).
+		AddButton("Cancel", func() {
+			app.NextState = "viewPattern"
+			app.Ui.Stop()
+		})
+
+	app.PrevState = "editPatternArchive"
+	app.Update = true
+	form.SetBorder(true).SetTitle("Edit Pattern").SetTitleAlign(tview.AlignLeft)
+
+	return form
+}
+
+func (app *App) processPatternArchived(checked bool) {
+	app.Pattern.Archive = checked
+}
+
+func (app *App) SubmitPatternArchive() (err error) {
+	if app.NextState != "submitPatternArchive" {
+		panic("Invalid State")
+	}
+
+	if app.Pattern.Archive {
+		err = app.DBAL.PatternSetArchive(app.Pattern.GetPatternID)
+	} else {
+		err = app.DBAL.PatternSetUnArchive(app.Pattern.GetPatternID)
+	}
+
+	app.PrevState = "submitPatternArchive"
 	app.NextState = "viewPattern"
 	app.Update = true
 	return err

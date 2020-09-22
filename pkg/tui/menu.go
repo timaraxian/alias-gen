@@ -30,6 +30,9 @@ func (app *App) ShowMenu() (list *tview.List) {
 
 	app.PrevState = "menu"
 	app.Update = true
+
+	list.SetBorder(true).SetTitle("Alias Generator").SetTitleAlign(tview.AlignLeft)
+
 	return list
 
 }

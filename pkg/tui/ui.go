@@ -31,10 +31,12 @@ type Word struct {
 	SetWord     string
 	SetLanguage string
 	SetPart     string
+	Archive     bool
 }
 
 type Pattern struct {
 	GetPatternID string
 	SetPattern   string
 	SetLanguage  string
+	Archive      bool
 }

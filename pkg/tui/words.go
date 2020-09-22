@@ -27,7 +27,7 @@ func (app *App) ShowNewWord() (form *tview.Form) {
 			app.Ui.Stop()
 		}).
 		AddButton("Cancel", func() {
-			app.NextState = "list"
+			app.NextState = "menu"
 			app.Ui.Stop()
 		})
 
@@ -51,7 +51,7 @@ func (app *App) processWordPart(text string) {
 	app.Word.SetPart = strings.TrimSpace(text)
 }
 
-func (app *App) SubmitNewWord(form *tview.Form) (err error) {
+func (app *App) SubmitNewWord() (err error) {
 	if app.NextState != "submitWord" {
 		panic("Invalid State")
 	}
@@ -165,7 +165,10 @@ func (app *App) ViewWord() (list *tview.List) {
 	UpdatedAt := word.UpdatedAt.Format("2006-01-02 15:04:05")
 	ArchivedAt := ""
 	if word.ArchivedAt != nil {
+		app.Word.Archive = true
 		ArchivedAt = word.ArchivedAt.Format("2006-01-02 15:04:05")
+	} else {
+		app.Word.Archive = false
 	}
 
 	list = tview.NewList().
@@ -233,7 +236,7 @@ func (app *App) ShowEditWordWord() (form *tview.Form) {
 	return form
 }
 
-func (app *App) SubmitWordWord(form *tview.Form) (err error) {
+func (app *App) SubmitWordWord() (err error) {
 	if app.NextState != "submitWordWord" {
 		panic("Invalid State")
 	}
@@ -269,7 +272,7 @@ func (app *App) ShowEditWordLanguage() (form *tview.Form) {
 	return form
 }
 
-func (app *App) SubmitWordLanguage(form *tview.Form) (err error) {
+func (app *App) SubmitWordLanguage() (err error) {
 	if app.NextState != "submitWordLanguage" {
 		panic("Invalid State")
 	}
@@ -305,13 +308,59 @@ func (app *App) ShowEditWordPart() (form *tview.Form) {
 	return form
 }
 
-func (app *App) SubmitWordPart(form *tview.Form) (err error) {
+func (app *App) SubmitWordPart() (err error) {
 	if app.NextState != "submitWordPart" {
 		panic("Invalid State")
 	}
 
 	err = app.DBAL.WordSetPart(app.Word.GetWordID, app.Word.SetPart)
 	app.PrevState = "submitWordPart"
+	app.NextState = "viewWord"
+	app.Update = true
+	return err
+}
+
+func (app *App) ShowEditWordArchive() (form *tview.Form) {
+	if app.NextState != "editWordArchive" {
+		panic("Invalid State")
+	}
+
+	form = tview.NewForm().
+		AddCheckbox("archived", app.Word.Archive, func(checked bool) {
+			app.processWordArchived(checked)
+		}).
+		AddButton("Edit Archive", func() {
+			app.NextState = "submitWordArchive"
+			app.Ui.Stop()
+		}).
+		AddButton("Cancel", func() {
+			app.NextState = "viewWord"
+			app.Ui.Stop()
+		})
+
+	app.PrevState = "editWordArchive"
+	app.Update = true
+	form.SetBorder(true).SetTitle("Edit Word").SetTitleAlign(tview.AlignLeft)
+
+	return form
+}
+
+func (app *App) processWordArchived(checked bool) {
+	app.Word.Archive = checked
+}
+
+func (app *App) SubmitWordArchive() (err error) {
+	if app.NextState != "submitWordArchive" {
+		panic("Invalid State")
+	}
+
+	if app.Word.Archive {
+		err = app.DBAL.WordSetArchive(app.Word.GetWordID)
+	} else {
+		err = app.DBAL.WordSetUnArchive(app.Word.GetWordID)
+	}
+
+	app.PrevState = "submitWordArchive"
 	app.NextState = "viewWord"
 	app.Update = true
 	return err

@@ -47,10 +47,12 @@ func main() {
 			switch app.NextState {
 			case "menu":
 				list = app.ShowMenu()
+
+				//Words
 			case "addWord":
 				form = app.ShowNewWord()
 			case "submitWord":
-				err = app.SubmitNewWord(form)
+				err = app.SubmitNewWord()
 				if err != nil {
 					panic(err)
 				}
@@ -61,28 +63,37 @@ func main() {
 			case "editWordWord":
 				form = app.ShowEditWordWord()
 			case "submitWordWord":
-				err = app.SubmitWordWord(form)
+				err = app.SubmitWordWord()
 				if err != nil {
 					panic(err)
 				}
 			case "editWordLanguage":
 				form = app.ShowEditWordLanguage()
 			case "submitWordLanguage":
-				err = app.SubmitWordLanguage(form)
+				err = app.SubmitWordLanguage()
 				if err != nil {
 					panic(err)
 				}
 			case "editWordPart":
 				form = app.ShowEditWordPart()
 			case "submitWordPart":
-				err = app.SubmitWordPart(form)
+				err = app.SubmitWordPart()
 				if err != nil {
 					panic(err)
 				}
+			case "editWordArchive":
+				form = app.ShowEditWordArchive()
+			case "submitWordArchive":
+				err = app.SubmitWordArchive()
+				if err != nil {
+					panic(err)
+				}
+
+				//Patterns
 			case "addPattern":
 				form = app.ShowNewPattern()
 			case "submitPattern":
-				err = app.SubmitNewPattern(form)
+				err = app.SubmitNewPattern()
 				if err != nil {
 					panic(err)
 				}
@@ -93,14 +104,21 @@ func main() {
 			case "editPatternPattern":
 				form = app.ShowEditPatternPattern()
 			case "submitPatternPattern":
-				err = app.SubmitPatternPattern(form)
+				err = app.SubmitPatternPattern()
 				if err != nil {
 					panic(err)
 				}
 			case "editPatternLanguage":
 				form = app.ShowEditPatternLanguage()
 			case "submitPatternLanguage":
-				err = app.SubmitPatternLanguage(form)
+				err = app.SubmitPatternLanguage()
+				if err != nil {
+					panic(err)
+				}
+			case "editPatternArchive":
+				form = app.ShowEditPatternArchive()
+			case "submitPatternArchive":
+				err = app.SubmitPatternArchive()
 				if err != nil {
 					panic(err)
 				}
@@ -115,7 +133,7 @@ func main() {
 				if err != nil {
 					panic(err)
 				}
-			case "addWord", "editWordWord", "editWordLanguage", "editWordPart", "addPattern", "editPatternPattern", "editPatternLanguage":
+			case "addWord", "editWordWord", "editWordLanguage", "editWordPart", "editWordArchive", "addPattern", "editPatternPattern", "editPatternLanguage", "editPatternArchive":
 				err := app.Ui.SetRoot(form, true).SetFocus(form).Run()
 				if err != nil {
 					panic(err)
