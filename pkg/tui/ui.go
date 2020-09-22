@@ -11,6 +11,8 @@ type App struct {
 	Ui   *tview.Application
 	DBAL *database.DBAL
 
+	Err error
+
 	PrevState string
 	NextState string
 	Update    bool
@@ -18,8 +20,8 @@ type App struct {
 	Word    Word
 	Pattern Pattern
 
-	WordListArgs    database.WordListArgs
-	PatternListArgs database.PatternListArgs
+	WordListArgs    WordListArgs
+	PatternListArgs PatternListArgs
 }
 
 type Config struct {
@@ -39,4 +41,34 @@ type Pattern struct {
 	SetPattern   string
 	SetLanguage  string
 	Archive      bool
+}
+
+type WordListArgs struct {
+	Limit            int
+	Offset           int
+	OrderByWord      bool
+	DescWord         bool
+	OrderByLanguage  bool
+	DescLanguage     bool
+	OrderByPart      bool
+	DescPart         bool
+	OrderByUpdatedAt bool
+	DescUpdatedAt    bool
+	OrderByCreatedAt bool
+	DescCreatedAt    bool
+	ShowArchived     bool
+}
+
+type PatternListArgs struct {
+	Limit            int
+	Offset           int
+	OrderByPattern   bool
+	DescPattern      bool
+	OrderByLanguage  bool
+	DescLanguage     bool
+	OrderByUpdatedAt bool
+	DescUpdatedAt    bool
+	OrderByCreatedAt bool
+	DescCreatedAt    bool
+	ShowArchived     bool
 }

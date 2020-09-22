@@ -1,6 +1,7 @@
 package tui
 
 import (
+	"strconv"
 	"strings"
 
 	"github.com/gdamore/tcell"
@@ -66,8 +67,20 @@ func (app *App) ListPatterns() (table *tview.Table) {
 		panic("Invalid State")
 	}
 
-	// get patterns from DBAL todo: list args
-	patterns, err := app.DBAL.PatternList(app.PatternListArgs)
+	// get patterns from DBAL
+	listArgs := database.PatternListArgs{}
+	listArgs.Limit = &app.PatternListArgs.Limit
+	listArgs.Offset = &app.PatternListArgs.Offset
+	listArgs.OrderByPattern = &app.PatternListArgs.OrderByPattern
+	listArgs.DescPattern = &app.PatternListArgs.DescPattern
+	listArgs.OrderByLanguage = &app.PatternListArgs.OrderByLanguage
+	listArgs.DescLanguage = &app.PatternListArgs.DescLanguage
+	listArgs.OrderByUpdatedAt = &app.PatternListArgs.OrderByUpdatedAt
+	listArgs.DescUpdatedAt = &app.PatternListArgs.DescUpdatedAt
+	listArgs.OrderByCreatedAt = &app.PatternListArgs.OrderByCreatedAt
+	listArgs.DescCreatedAt = &app.PatternListArgs.DescCreatedAt
+	listArgs.ShowArchived = &app.PatternListArgs.ShowArchived
+	patterns, err := app.DBAL.PatternList(listArgs)
 	if err != nil {
 		panic(err)
 	}
@@ -109,12 +122,17 @@ func (app *App) ListPatterns() (table *tview.Table) {
 			app.Update = true
 			app.Ui.Stop()
 		}
+		if key == tcell.KeyTAB {
+			app.NextState = "viewPatternListArgs"
+			app.Update = true
+			app.Ui.Stop()
+		}
 	})
 
 	app.PrevState = "listPatterns"
 	app.Update = true
 
-	table.SetBorder(true).SetTitle("Patterns").SetTitleAlign(tview.AlignLeft)
+	table.SetBorder(true).SetTitle("Patterns (TAB for options || ESC for menu)").SetTitleAlign(tview.AlignLeft)
 
 	return table
 }
@@ -139,6 +157,87 @@ func getPatternRowValue(row database.Pattern, c int) string {
 		return ""
 	}
 	return ""
+}
+
+func (app *App) ShowPatternListArgs() (form *tview.Form) {
+	if app.NextState != "viewPatternListArgs" {
+		panic("Invalid State")
+	}
+
+	limit := strconv.Itoa(app.PatternListArgs.Limit)
+	offset := strconv.Itoa(app.PatternListArgs.Offset)
+
+	form = tview.NewForm().
+		AddInputField("Limit", limit, 5, nil, func(text string) {
+			app.processPatternListArgsLimit(text)
+		}).
+		AddInputField("Offset", offset, 5, nil, func(text string) {
+			app.processPatternListArgsOffset(text)
+		}).
+		AddCheckbox("Order By Pattern", app.PatternListArgs.OrderByPattern, func(checked bool) {
+			app.PatternListArgs.OrderByPattern = checked
+		}).
+		AddCheckbox("Descending Pattern", app.PatternListArgs.DescPattern, func(checked bool) {
+			app.PatternListArgs.DescPattern = checked
+		}).
+		AddCheckbox("Order By Language", app.PatternListArgs.OrderByLanguage, func(checked bool) {
+			app.PatternListArgs.OrderByLanguage = checked
+		}).
+		AddCheckbox("Descending Language", app.PatternListArgs.DescLanguage, func(checked bool) {
+			app.PatternListArgs.DescLanguage = checked
+		}).
+		AddCheckbox("Order By UpdatedAt", app.PatternListArgs.OrderByUpdatedAt, func(checked bool) {
+			app.PatternListArgs.OrderByUpdatedAt = checked
+		}).
+		AddCheckbox("Descending UpdatedAt", app.PatternListArgs.DescUpdatedAt, func(checked bool) {
+			app.PatternListArgs.DescUpdatedAt = checked
+		}).
+		AddCheckbox("Order By CreatedAt", app.PatternListArgs.OrderByCreatedAt, func(checked bool) {
+			app.PatternListArgs.OrderByCreatedAt = checked
+		}).
+		AddCheckbox("Descending CreatedAt", app.PatternListArgs.DescCreatedAt, func(checked bool) {
+			app.PatternListArgs.DescCreatedAt = checked
+		}).
+		AddCheckbox("Show Archived", app.PatternListArgs.ShowArchived, func(checked bool) {
+			app.PatternListArgs.ShowArchived = checked
+		}).
+		AddButton("Back to list", func() {
+			app.updatePatternListArgsLimitOffset()
+			app.NextState = "listPatterns"
+			app.Ui.Stop()
+		})
+
+	app.PrevState = "viewPatternListArgs"
+	app.Update = true
+	form.SetBorder(true).SetTitle("Pattern List Args").SetTitleAlign(tview.AlignLeft)
+
+	return form
+}
+
+func (app *App) processPatternListArgsLimit(text string) {
+	i, err := strconv.Atoi(strings.TrimSpace(text))
+	if err != nil {
+		app.Err = err
+	} else {
+		app.Err = nil
+	}
+	app.PatternListArgs.Limit = i
+}
+
+func (app *App) processPatternListArgsOffset(text string) {
+	i, err := strconv.Atoi(strings.TrimSpace(text))
+	if err != nil {
+		app.Err = err
+	} else {
+		app.Err = nil
+	}
+	app.PatternListArgs.Offset = i
+}
+
+func (app *App) updatePatternListArgsLimitOffset() {
+	if app.Err != nil {
+		panic(app.Err)
+	}
 }
 
 func (app *App) ViewPattern() (list *tview.List) {

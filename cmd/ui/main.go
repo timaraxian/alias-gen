@@ -22,17 +22,21 @@ func main() {
 		Config:          config,
 		Ui:              ui,
 		DBAL:            nil,
+		Err:             nil,
 		PrevState:       "init",
 		NextState:       "menu",
 		Update:          false,
 		Word:            tui.Word{},
 		Pattern:         tui.Pattern{},
-		WordListArgs:    database.WordListArgs{},
-		PatternListArgs: database.PatternListArgs{},
+		WordListArgs:    tui.WordListArgs{},
+		PatternListArgs: tui.PatternListArgs{},
 	}
 
 	var err error
 	app.DBAL, err = database.Bootstrap(app.Config.DB)
+	if err != nil {
+		panic(err)
+	}
 
 	var list *tview.List
 	var form *tview.Form
@@ -58,6 +62,8 @@ func main() {
 				}
 			case "listWords":
 				table = app.ListWords()
+			case "viewWordListArgs":
+				form = app.ShowWordListArgs()
 			case "viewWord":
 				list = app.ViewWord()
 			case "editWordWord":
@@ -99,6 +105,8 @@ func main() {
 				}
 			case "listPatterns":
 				table = app.ListPatterns()
+			case "viewPatternListArgs":
+				form = app.ShowPatternListArgs()
 			case "viewPattern":
 				list = app.ViewPattern()
 			case "editPatternPattern":
@@ -133,7 +141,7 @@ func main() {
 				if err != nil {
 					panic(err)
 				}
-			case "addWord", "editWordWord", "editWordLanguage", "editWordPart", "editWordArchive", "addPattern", "editPatternPattern", "editPatternLanguage", "editPatternArchive":
+			case "addWord", "editWordWord", "editWordLanguage", "editWordPart", "editWordArchive", "viewWordListArgs", "addPattern", "editPatternPattern", "editPatternLanguage", "editPatternArchive", "viewPatternListArgs":
 				err := app.Ui.SetRoot(form, true).SetFocus(form).Run()
 				if err != nil {
 					panic(err)

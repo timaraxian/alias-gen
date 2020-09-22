@@ -1,6 +1,7 @@
 package tui
 
 import (
+	"strconv"
 	"strings"
 
 	"github.com/gdamore/tcell"
@@ -69,8 +70,22 @@ func (app *App) ListWords() (table *tview.Table) {
 		panic("Invalid State")
 	}
 
-	// get words from DBAL todo: list args
-	words, err := app.DBAL.WordList(app.WordListArgs)
+	// get words from DBAL
+	listArgs := database.WordListArgs{}
+	listArgs.Limit = &app.WordListArgs.Limit
+	listArgs.Offset = &app.WordListArgs.Offset
+	listArgs.OrderByWord = &app.WordListArgs.OrderByWord
+	listArgs.DescWord = &app.WordListArgs.DescWord
+	listArgs.OrderByLanguage = &app.WordListArgs.OrderByLanguage
+	listArgs.DescLanguage = &app.WordListArgs.DescLanguage
+	listArgs.OrderByPart = &app.WordListArgs.OrderByPart
+	listArgs.DescPart = &app.WordListArgs.DescPart
+	listArgs.OrderByUpdatedAt = &app.WordListArgs.OrderByUpdatedAt
+	listArgs.DescUpdatedAt = &app.WordListArgs.DescUpdatedAt
+	listArgs.OrderByCreatedAt = &app.WordListArgs.OrderByCreatedAt
+	listArgs.DescCreatedAt = &app.WordListArgs.DescCreatedAt
+	listArgs.ShowArchived = &app.WordListArgs.ShowArchived
+	words, err := app.DBAL.WordList(listArgs)
 	if err != nil {
 		panic(err)
 	}
@@ -112,13 +127,17 @@ func (app *App) ListWords() (table *tview.Table) {
 			app.Update = true
 			app.Ui.Stop()
 		}
+		if key == tcell.KeyTAB {
+			app.NextState = "viewWordListArgs"
+			app.Update = true
+			app.Ui.Stop()
+		}
 	})
 
 	app.PrevState = "listWords"
-	//app.NextState = "navigateWordTable"
 	app.Update = true
 
-	table.SetBorder(true).SetTitle("Words").SetTitleAlign(tview.AlignLeft)
+	table.SetBorder(true).SetTitle("Words (TAB for options || ESC for menu)").SetTitleAlign(tview.AlignLeft)
 
 	return table
 }
@@ -145,6 +164,93 @@ func getWordRowValue(row database.Word, c int) string {
 		return ""
 	}
 	return ""
+}
+
+func (app *App) ShowWordListArgs() (form *tview.Form) {
+	if app.NextState != "viewWordListArgs" {
+		panic("Invalid State")
+	}
+
+	limit := strconv.Itoa(app.WordListArgs.Limit)
+	offset := strconv.Itoa(app.WordListArgs.Offset)
+
+	form = tview.NewForm().
+		AddInputField("Limit", limit, 5, nil, func(text string) {
+			app.processWordListArgsLimit(text)
+		}).
+		AddInputField("Offset", offset, 5, nil, func(text string) {
+			app.processWordListArgsOffset(text)
+		}).
+		AddCheckbox("Order By Word", app.WordListArgs.OrderByWord, func(checked bool) {
+			app.WordListArgs.OrderByWord = checked
+		}).
+		AddCheckbox("Descending Word", app.WordListArgs.DescWord, func(checked bool) {
+			app.WordListArgs.DescWord = checked
+		}).
+		AddCheckbox("Order By Language", app.WordListArgs.OrderByLanguage, func(checked bool) {
+			app.WordListArgs.OrderByLanguage = checked
+		}).
+		AddCheckbox("Descending Language", app.WordListArgs.DescLanguage, func(checked bool) {
+			app.WordListArgs.DescLanguage = checked
+		}).
+		AddCheckbox("Order By Part", app.WordListArgs.OrderByPart, func(checked bool) {
+			app.WordListArgs.OrderByPart = checked
+		}).
+		AddCheckbox("Descending Part", app.WordListArgs.DescPart, func(checked bool) {
+			app.WordListArgs.DescPart = checked
+		}).
+		AddCheckbox("Order By UpdatedAt", app.WordListArgs.OrderByUpdatedAt, func(checked bool) {
+			app.WordListArgs.OrderByUpdatedAt = checked
+		}).
+		AddCheckbox("Descending UpdatedAt", app.WordListArgs.DescUpdatedAt, func(checked bool) {
+			app.WordListArgs.DescUpdatedAt = checked
+		}).
+		AddCheckbox("Order By CreatedAt", app.WordListArgs.OrderByCreatedAt, func(checked bool) {
+			app.WordListArgs.OrderByCreatedAt = checked
+		}).
+		AddCheckbox("Descending CreatedAt", app.WordListArgs.DescCreatedAt, func(checked bool) {
+			app.WordListArgs.DescCreatedAt = checked
+		}).
+		AddCheckbox("Show Archived", app.WordListArgs.ShowArchived, func(checked bool) {
+			app.WordListArgs.ShowArchived = checked
+		}).
+		AddButton("Back to list", func() {
+			app.updateWordListArgsLimitOffset()
+			app.NextState = "listWords"
+			app.Ui.Stop()
+		})
+
+	app.PrevState = "viewWordListArgs"
+	app.Update = true
+	form.SetBorder(true).SetTitle("Word List Args").SetTitleAlign(tview.AlignLeft)
+
+	return form
+}
+
+func (app *App) processWordListArgsLimit(text string) {
+	i, err := strconv.Atoi(strings.TrimSpace(text))
+	if err != nil {
+		app.Err = err
+	} else {
+		app.Err = nil
+	}
+	app.WordListArgs.Limit = i
+}
+
+func (app *App) processWordListArgsOffset(text string) {
+	i, err := strconv.Atoi(strings.TrimSpace(text))
+	if err != nil {
+		app.Err = err
+	} else {
+		app.Err = nil
+	}
+	app.WordListArgs.Offset = i
+}
+
+func (app *App) updateWordListArgsLimitOffset() {
+	if app.Err != nil {
+		panic(app.Err)
+	}
 }
 
 func (app *App) ViewWord() (list *tview.List) {
