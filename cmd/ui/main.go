@@ -139,7 +139,6 @@ func main() {
 			case "showRandomAlias":
 				modal = app.ShowRandomAlias()
 			}
-
 		}
 
 		if app.Update {

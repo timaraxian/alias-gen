@@ -74,10 +74,14 @@ func (app *App) ShowRandomAlias() (modal *tview.Modal) {
 	modal = tview.NewModal().
 		SetText("Random alias").
 		SetText(alias).
-		AddButtons([]string{"Change Language", "Menu", "Quit"}).
+		AddButtons([]string{"Generate Another", "Change Language", "Menu", "Quit"}).
 		SetDoneFunc(func(buttonIndex int, buttonLabel string) {
 			if buttonLabel == "Change Language" {
 				app.NextState = "selectLanguage"
+				app.Ui.Stop()
+			}
+			if buttonLabel == "Generate Another" {
+				app.PrevState = ""
 				app.Ui.Stop()
 			}
 			if buttonLabel == "Menu" {
