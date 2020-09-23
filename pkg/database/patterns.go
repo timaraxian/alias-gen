@@ -297,7 +297,7 @@ func (dbal DBAL) PatternRandom(language string) (pattern Pattern, err error) {
                 language,
                 created_at,
                 updated_at,
-                archived_at FROM patterns WHERE language=$1 ORDER BY RANDOM() LIMIT 1;`
+                archived_at FROM patterns WHERE language=$1 AND archived_at IS NULL ORDER BY RANDOM() LIMIT 1;`
 
 	err = dbal.QueryRow(stmt, language).Scan(
 		&pattern.PatternID,

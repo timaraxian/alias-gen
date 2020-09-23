@@ -338,7 +338,7 @@ func (dbal DBAL) WordRandom(language, part string) (word Word, err error) {
                 part,
                 created_at,
                 updated_at,
-                archived_at FROM words WHERE language=$1 AND part=$2 ORDER BY RANDOM() LIMIT 1;`
+                archived_at FROM words WHERE language=$1 AND part=$2 AND archived_at IS NULL ORDER BY RANDOM() LIMIT 1;`
 
 	err = dbal.QueryRow(stmt, language, part).Scan(
 		&word.WordID,
