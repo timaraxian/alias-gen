@@ -30,6 +30,7 @@ func main() {
 		Pattern:         tui.Pattern{},
 		WordListArgs:    tui.WordListArgs{},
 		PatternListArgs: tui.PatternListArgs{},
+		Random:          tui.Random{},
 	}
 
 	var err error
@@ -41,6 +42,7 @@ func main() {
 	var list *tview.List
 	var form *tview.Form
 	var table *tview.Table
+	var modal *tview.Modal
 
 	for {
 		if app.NextState == "stop" {
@@ -130,6 +132,12 @@ func main() {
 				if err != nil {
 					panic(err)
 				}
+
+				//random
+			case "selectLanguage":
+				form = app.SelectLanguage()
+			case "showRandomAlias":
+				modal = app.ShowRandomAlias()
 			}
 
 		}
@@ -141,13 +149,18 @@ func main() {
 				if err != nil {
 					panic(err)
 				}
-			case "addWord", "editWordWord", "editWordLanguage", "editWordPart", "editWordArchive", "viewWordListArgs", "addPattern", "editPatternPattern", "editPatternLanguage", "editPatternArchive", "viewPatternListArgs":
+			case "addWord", "editWordWord", "editWordLanguage", "editWordPart", "editWordArchive", "viewWordListArgs", "addPattern", "editPatternPattern", "editPatternLanguage", "editPatternArchive", "viewPatternListArgs", "selectLanguage":
 				err := app.Ui.SetRoot(form, true).SetFocus(form).Run()
 				if err != nil {
 					panic(err)
 				}
 			case "listWords", "listPatterns":
 				err := app.Ui.SetRoot(table, true).SetFocus(table).Run()
+				if err != nil {
+					panic(err)
+				}
+			case "showRandomAlias", "err":
+				err := app.Ui.SetRoot(modal, true).SetFocus(modal).Run()
 				if err != nil {
 					panic(err)
 				}

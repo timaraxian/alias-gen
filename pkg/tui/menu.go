@@ -23,6 +23,10 @@ func (app *App) ShowMenu() (list *tview.List) {
 			app.NextState = "listPatterns"
 			app.Ui.Stop()
 		}).
+		AddItem("Generate Random Alias", "Generate a random alias from a random pattern", 'e', func() {
+			app.NextState = "selectLanguage"
+			app.Ui.Stop()
+		}).
 		AddItem("Quit", "Press to exit", 'q', func() {
 			app.NextState = "stop"
 			app.Ui.Stop()

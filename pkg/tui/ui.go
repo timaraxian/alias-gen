@@ -22,6 +22,8 @@ type App struct {
 
 	WordListArgs    WordListArgs
 	PatternListArgs PatternListArgs
+
+	Random Random
 }
 
 type Config struct {
@@ -71,4 +73,11 @@ type PatternListArgs struct {
 	OrderByCreatedAt bool
 	DescCreatedAt    bool
 	ShowArchived     bool
+}
+
+type Random struct {
+	language string
+	pattern  []string
+	alias    []string
+	empty    bool
 }
