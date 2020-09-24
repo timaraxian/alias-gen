@@ -16,28 +16,22 @@ func main() {
 		log.Printf("Failed to open config file: %s\n", err)
 		os.Exit(1)
 	}
-	ui := tview.NewApplication()
 
-	app := tui.App{
-		Config:          config,
-		Ui:              ui,
-		DBAL:            nil,
-		Err:             nil,
-		PrevState:       "init",
-		NextState:       "menu",
-		Update:          false,
-		Word:            tui.Word{},
-		Pattern:         tui.Pattern{},
-		WordListArgs:    tui.WordListArgs{},
-		PatternListArgs: tui.PatternListArgs{},
-		Random:          tui.Random{},
+	dbal, err := database.Bootstrap(config.DB)
+	if err != nil{
+		panic(err)
 	}
 
-	var err error
-	app.DBAL, err = database.Bootstrap(app.Config.DB)
+	app, err := tui.NewApp(config, []tui.Service{
+		func(a *tui.App) (err error) {
+			a.DBAL = dbal
+			return nil
+		},
+	})
 	if err != nil {
 		panic(err)
 	}
+
 
 	var list *tview.List
 	var form *tview.Form
