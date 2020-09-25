@@ -1,4 +1,4 @@
-# Hotel-gen
+# Alias-gen
 
 
 ## Getting Started
